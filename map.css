@@ -1,0 +1,7 @@
+#map {
+  flex: 1;              /* fill the rest of the page below the heading */
+  width: 100%;
+  min-height: 500px;    /* never collapse to zero height */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
