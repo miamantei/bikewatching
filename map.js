@@ -24,6 +24,14 @@ const bikeLaneStyle = {
   'line-opacity': 0.6,
 };
 
+// Maps departure share (0–1) to one of three values: 0, 0.5, or 1
+const stationFlow = d3.scaleQuantize().domain([0, 1]).range([0, 0.5, 1]);
+
+// Departure ratio for a station (0.5 = balanced if no traffic, to avoid dividing by 0)
+function departureRatio(d) {
+  return d.totalTraffic ? stationFlow(d.departures / d.totalTraffic) : 0.5;
+}
+
 // ---------- Global helpers ----------
 
 // Step 5.4: trips grouped by minute of the day (1440 minutes in a day)
@@ -162,6 +170,7 @@ map.on('load', async () => {
     .enter()
     .append('circle')
     .attr('r', (d) => radiusScale(d.totalTraffic))
+    .style('--departure-ratio', departureRatio)
     .each(function (d) {
       d3.select(this).append('title').text(tooltipText(d));
     });
@@ -194,6 +203,7 @@ map.on('load', async () => {
       .data(filteredStations, (d) => d.short_name)
       .join('circle')
       .attr('r', (d) => radiusScale(d.totalTraffic))
+      .style('--departure-ratio', departureRatio)
       .select('title')
       .text(tooltipText); // keep tooltip numbers in sync with the slider
   }

@@ -13,10 +13,40 @@
   pointer-events: none; /* clicks pass through so you can still drag the map */
 }
 
+/* Shared color logic: used by both the map circles and the legend */
+#map svg circle,
+.legend > div {
+  --color-departures: steelblue;
+  --color-arrivals: darkorange;
+  --color: color-mix(
+    in oklch,
+    var(--color-departures) calc(100% * var(--departure-ratio)),
+    var(--color-arrivals)
+  );
+}
+
 #map svg circle {
-  fill: steelblue;
+  fill: var(--color);
   fill-opacity: 60%;
   stroke: white;
   stroke-width: 1;
-  pointer-events: auto; /* turns hover back on for circles, so tooltips work */
+  pointer-events: auto;
 }
+
+.legend {
+  display: flex;
+  gap: 1px;              /* thin gap so colors don't touch */
+  margin-block: 1em;     /* space from the map */
+}
+
+.legend > div {
+  flex: 1;               /* equal widths */
+  padding: 0.4em 1.5em;  /* more horizontal than vertical */
+  background: var(--color);
+  color: white;
+  font-weight: 600;
+}
+
+.legend > div:nth-child(1) { text-align: left; }
+.legend > div:nth-child(2) { text-align: center; }
+.legend > div:nth-child(3) { text-align: right; }
