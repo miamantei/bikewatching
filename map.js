@@ -70,31 +70,65 @@ map.on('load', async () => {
     return; // stop here if the data didn't load
   }
 
-  let stations = jsonData.data.stations;
-  console.log('Stations Array:', stations);
+   let stations = jsonData.data.stations;
 
-  // --- Step 3.3: Draw a circle for each station ---
+  // --- Step 4.1: Load the trip data (big file — may take a few seconds) ---
+  const trips = await d3.csv(
+    'https://dsc106.com/labs/lab07/data/bluebikes-traffic-2024-03.csv'
+  );
+  console.log('Loaded trips:', trips.length);
+
+  // --- Step 4.2: Count departures and arrivals per station ---
+  const departures = d3.rollup(
+    trips,
+    (v) => v.length,
+    (d) => d.start_station_id
+  );
+
+  const arrivals = d3.rollup(
+    trips,
+    (v) => v.length,
+    (d) => d.end_station_id
+  );
+
+  stations = stations.map((station) => {
+    let id = station.short_name;
+    station.arrivals = arrivals.get(id) ?? 0;
+    station.departures = departures.get(id) ?? 0;
+    station.totalTraffic = station.arrivals + station.departures;
+    return station;
+  });
+  console.log('Stations with traffic:', stations);
+
+  // --- Step 4.3: Square-root scale so circle AREA matches traffic ---
+  const radiusScale = d3
+    .scaleSqrt()
+    .domain([0, d3.max(stations, (d) => d.totalTraffic)])
+    .range([0, 25]);
+
+  // --- Draw circles, sized by traffic, with tooltips (Step 4.4) ---
   const circles = svg
     .selectAll('circle')
     .data(stations)
     .enter()
     .append('circle')
-    .attr('r', 5)
-    .attr('fill', 'steelblue')
-    .attr('stroke', 'white')
-    .attr('stroke-width', 1)
-    .attr('opacity', 0.8);
+    .attr('r', (d) => radiusScale(d.totalTraffic))
+    .each(function (d) {
+      d3.select(this)
+        .append('title')
+        .text(
+          `${d.totalTraffic} trips (${d.departures} departures, ${d.arrivals} arrivals)`
+        );
+    });
 
-  // Move the circles to match the map's current position/zoom
   function updatePositions() {
     circles
       .attr('cx', (d) => getCoords(d).cx)
       .attr('cy', (d) => getCoords(d).cy);
   }
 
-  updatePositions(); // place them once on load
+  updatePositions();
 
-  // Keep circles lined up whenever the map changes
   map.on('move', updatePositions);
   map.on('zoom', updatePositions);
   map.on('resize', updatePositions);

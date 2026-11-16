@@ -12,3 +12,11 @@
   height: 100%;
   pointer-events: none; /* clicks pass through so you can still drag the map */
 }
+
+#map svg circle {
+  fill: steelblue;
+  fill-opacity: 60%;
+  stroke: white;
+  stroke-width: 1;
+  pointer-events: auto; /* turns hover back on for circles, so tooltips work */
+}
