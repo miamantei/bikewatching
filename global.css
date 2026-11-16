@@ -8,3 +8,24 @@ body {
   margin: auto;
   padding: 1em;
 }
+
+header {
+  display: flex;
+  gap: 1em;
+  align-items: baseline;
+}
+
+header label {
+  margin-left: auto;   /* push the slider to the right */
+  text-align: right;
+}
+
+header time,
+header em {
+  display: block;      /* own line, so the slider doesn't jump around */
+}
+
+header em {
+  color: gray;
+  font-style: italic;
+}
